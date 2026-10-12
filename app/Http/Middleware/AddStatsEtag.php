@@ -26,6 +26,8 @@ final readonly class AddStatsEtag
             return $response;
         }
 
+        // Category names are translated, so shared caches must key the body on the language too.
+        $response->setVary('Accept-Language', false);
         $response->setEtag(hash('sha256', (string) $response->getContent()));
         $response->isNotModified($request);
 

@@ -91,3 +91,13 @@ it('sends no ETag on errors', function (): void {
         ->assertUnprocessable()
         ->assertHeaderMissing('ETag');
 });
+
+it('varies on Accept-Language because category names are translated', function (string $endpoint): void {
+    $url = "/api/v1/stats/{$endpoint}?from=2026-10-01&to=2026-10-31";
+
+    expect($this->getJson($url)->headers->get('Vary'))->toContain('Accept-Language');
+
+    $etag = (string) $this->getJson($url)->headers->get('ETag');
+
+    expect($this->getJson($url, ['If-None-Match' => $etag])->assertStatus(304)->headers->get('Vary'))->toContain('Accept-Language');
+})->with($endpoints);
