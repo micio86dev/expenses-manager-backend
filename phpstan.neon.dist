@@ -1,0 +1,13 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: max
+    paths:
+        - app
+        - bootstrap/app.php
+        - config
+        - database
+        - routes
+    # The Pest test suite is analysed by running it, not by PHPStan: Pest closures
+    # bind `$this` dynamically, which static analysis cannot follow.
