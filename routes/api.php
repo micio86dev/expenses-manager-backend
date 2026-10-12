@@ -22,6 +22,7 @@ use App\Http\Controllers\Expenses\UpdateExpenseController;
 use App\Http\Controllers\Stats\StatsByCategoryController;
 use App\Http\Controllers\Stats\StatsSummaryController;
 use App\Http\Controllers\Stats\StatsTimeseriesController;
+use App\Http\Middleware\AddStatsEtag;
 use App\Http\Middleware\CacheStatsResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -64,7 +65,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 });
 
 // Read-only aggregates: their own, separate rate limit so a dashboard cannot starve the CRUD budget.
-Route::middleware(['auth:sanctum', 'throttle:stats', CacheStatsResponse::class])->prefix('stats')->group(function (): void {
+Route::middleware(['auth:sanctum', 'throttle:stats', AddStatsEtag::class, CacheStatsResponse::class])->prefix('stats')->group(function (): void {
     Route::get('summary', StatsSummaryController::class);
     Route::get('by-category', StatsByCategoryController::class);
     Route::get('timeseries', StatsTimeseriesController::class);
