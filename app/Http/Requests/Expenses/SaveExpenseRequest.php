@@ -24,7 +24,7 @@ final class SaveExpenseRequest extends FormRequest
 
         return [
             'description' => ['required', 'string', 'min:1', 'max:255'],
-            'amount_cents' => ['required', 'integer:strict', 'min:1'],
+            'amount_cents' => ['required', 'integer:strict', 'min:1', 'max:'.Money::MAX_AMOUNT_CENTS],
             'currency' => ['sometimes', 'string', 'regex:/^[A-Z]{3}$/'],
             'category_id' => [
                 'required', 'string', 'uuid',

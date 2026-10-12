@@ -14,6 +14,9 @@ final readonly class Money
 {
     public const string DEFAULT_CURRENCY = 'EUR';
 
+    /** Largest accepted amount: 999,999,999.99 in a two-decimal currency. Keeps every sum far from integer overflow. */
+    public const int MAX_AMOUNT_CENTS = 99_999_999_999;
+
     public function __construct(
         public int $amountCents,
         public string $currency = self::DEFAULT_CURRENCY,

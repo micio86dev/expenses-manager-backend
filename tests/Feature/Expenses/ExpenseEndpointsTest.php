@@ -62,10 +62,10 @@ describe('create', function (): void {
     });
 
     it('stores other currencies and the largest amounts as integers', function (): void {
-        $this->postJson('/api/v1/expenses', expensePayload(['currency' => 'USD', 'amount_cents' => 9_007_199_254_740_993]))
+        $this->postJson('/api/v1/expenses', expensePayload(['currency' => 'USD', 'amount_cents' => 99_999_999_999]))
             ->assertCreated()
             ->assertJsonPath('data.currency', 'USD')
-            ->assertJsonPath('data.amount_cents', 9_007_199_254_740_993);
+            ->assertJsonPath('data.amount_cents', 99_999_999_999);
     });
 
     it('rejects invalid input', function (array $overrides, string $field): void {
@@ -78,6 +78,7 @@ describe('create', function (): void {
         'blank description' => [['description' => '   '], 'description'],
         'description too long' => [['description' => str_repeat('a', 256)], 'description'],
         'zero amount' => [['amount_cents' => 0], 'amount_cents'],
+        'amount above the maximum' => [['amount_cents' => 100_000_000_000], 'amount_cents'],
         'negative amount' => [['amount_cents' => -5], 'amount_cents'],
         'fractional amount' => [['amount_cents' => 10.5], 'amount_cents'],
         'amount as string' => [['amount_cents' => '1000'], 'amount_cents'],
@@ -226,6 +227,18 @@ describe('delete', function (): void {
         $this->deleteJson("/api/v1/expenses/{$bobs->id}")->assertNotFound()->assertValidResponse(404);
 
         expect(Expense::query()->withoutGlobalScopes()->find($bobs->id))->not->toBeNull();
+    });
+});
+
+describe('summing the largest amounts', function (): void {
+    it('keeps the statistics of a maximum-size expense over a long range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['amount_cents' => 99_999_999_999, 'spent_on' => '2026-10-12']))->assertCreated();
+
+        $this->getJson('/api/v1/stats/summary?from=2021-10-13&to=2026-10-12')
+            ->assertOk()
+            ->assertValidResponse(200)
+            ->assertJsonPath('data.total_cents', 99_999_999_999)
+            ->assertJsonPath('data.daily_average_cents', 54_764_513);
     });
 });
 
