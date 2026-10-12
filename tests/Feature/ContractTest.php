@@ -29,7 +29,7 @@ it('loads the OpenAPI 3.1 contract', function (): void {
     expect(Spectator::resolve()->openapi)->toStartWith('3.1');
 });
 
-it('implements every phase 2 operation of the contract', function (): void {
+it('implements every operation of the contract that has shipped', function (): void {
     $routes = collect(RouteFacade::getRoutes()->getRoutes())
         ->map(fn (Route $route): array => collect($route->methods())->reject(fn (string $m): bool => $m === 'HEAD')
             ->map(fn (string $method): string => $method.' /'.Str::after($route->uri(), 'api/v1/'))
@@ -37,7 +37,10 @@ it('implements every phase 2 operation of the contract', function (): void {
         ->flatten()
         ->all();
 
-    $implemented = ['/auth/register', '/auth/login', '/auth/logout', '/auth/me', '/health', '/ready'];
+    $implemented = [
+        '/auth/register', '/auth/login', '/auth/logout', '/auth/me', '/health', '/ready',
+        '/categories', '/categories/{category}', '/categories/{category}/archive', '/categories/{category}/unarchive',
+    ];
     $contractOperations = collect(Spectator::resolve()->paths)
         ->flatMap(fn ($item, string $path): array => collect($item->getOperations())
             ->keys()

@@ -17,4 +17,10 @@ return [
         'leisure' => 'Tempo libero',
         'other' => 'Altro',
     ],
+
+    'errors' => [
+        'system_read_only' => 'Le categorie di sistema non possono essere modificate, eliminate o archiviate.',
+        'in_use' => 'Questa categoria è usata da alcune spese. Archiviala invece di eliminarla.',
+        'unavailable' => 'La categoria selezionata non esiste o è archiviata.',
+    ],
 ];

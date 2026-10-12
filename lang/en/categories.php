@@ -17,4 +17,10 @@ return [
         'leisure' => 'Leisure',
         'other' => 'Other',
     ],
+
+    'errors' => [
+        'system_read_only' => 'System categories cannot be modified, deleted or archived.',
+        'in_use' => 'This category is used by expenses. Archive it instead of deleting it.',
+        'unavailable' => 'The selected category does not exist or is archived.',
+    ],
 ];

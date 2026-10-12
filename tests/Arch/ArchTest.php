@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Illuminate\Contracts\Validation\ValidationRule;
 
 arch('every source file declares strict types')
     ->expect(['App', 'Database', 'Tests'])
@@ -17,6 +18,21 @@ arch('data transfer objects are final readonly classes')
     ->classes()
     ->toBeFinal()
     ->toBeReadonly();
+
+arch('value objects are final, readonly and know nothing about the framework layers')
+    ->expect(['App\Support\Money', 'App\Support\DateRange'])
+    ->toBeFinal()
+    ->toBeReadonly()
+    ->not->toUse(['Illuminate\Http', 'Illuminate\Database', 'App\Models']);
+
+arch('enums are enums')
+    ->expect('App\Enums')
+    ->toBeEnums();
+
+arch('validation rules depend on repository contracts, never on Eloquent implementations')
+    ->expect('App\Rules')
+    ->toImplement(ValidationRule::class)
+    ->not->toUse(['App\Repositories\Eloquent', 'Illuminate\Database']);
 
 arch('repository contracts are interfaces and implementations implement one')
     ->expect('App\Repositories\Contracts')
