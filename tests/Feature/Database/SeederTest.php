@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\SystemCategory;
 use App\Models\Category;
+use App\Models\Expense;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
@@ -11,6 +12,7 @@ use Database\Seeders\Reference\ReferenceSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Sanctum\Sanctum;
 
 /**
  * Runs a seeder directly: `db:seed` asks for confirmation in production.
@@ -95,4 +97,31 @@ it('seeds the system categories once, shared and read-only', function (): void {
     expect($system)->toHaveCount(count(SystemCategory::cases()))
         ->and($system->every(fn (Category $category): bool => $category->is_system && $category->owner_id === null))->toBeTrue()
         ->and($system->pluck('translation_key')->all())->toEqualCanonicalizing(array_map(fn (SystemCategory $c): string => $c->value, SystemCategory::cases()));
+});
+
+it('seeds a demo user with custom categories and expenses across several months', function (): void {
+    $this->app->detectEnvironment(fn (): string => 'local');
+
+    runSeeder(DatabaseSeeder::class);
+
+    $demo = User::query()->where('email', DemoSeeder::EMAIL)->firstOrFail();
+    Sanctum::actingAs($demo);
+
+    $expenses = Expense::query()->get();
+    $months = $expenses->map(fn (Expense $expense): string => $expense->spent_on->format('Y-m'))->unique();
+
+    expect($expenses->count())->toBeGreaterThanOrEqual(60)
+        ->and($months->count())->toBeGreaterThanOrEqual(5)
+        ->and($expenses->every(fn (Expense $expense): bool => $expense->amount_cents > 0 && $expense->owner_id === $demo->id))->toBeTrue()
+        ->and(Category::query()->where('is_system', false)->count())->toBeGreaterThanOrEqual(2);
+});
+
+it('does not duplicate demo data when the seeders run twice', function (): void {
+    $this->app->detectEnvironment(fn (): string => 'local');
+
+    runSeeder(DatabaseSeeder::class);
+    $first = databaseSnapshot();
+    runSeeder(DatabaseSeeder::class);
+
+    expect(databaseSnapshot())->toBe($first);
 });
