@@ -40,6 +40,7 @@ it('implements every operation of the contract that has shipped', function (): v
     $implemented = [
         '/auth/register', '/auth/login', '/auth/logout', '/auth/me', '/health', '/ready',
         '/categories', '/categories/{category}', '/categories/{category}/archive', '/categories/{category}/unarchive',
+        '/stats/summary', '/stats/by-category', '/stats/timeseries',
     ];
     $contractOperations = collect(Spectator::resolve()->paths)
         ->flatMap(fn ($item, string $path): array => collect($item->getOperations())

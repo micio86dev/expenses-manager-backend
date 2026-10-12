@@ -19,6 +19,9 @@ use App\Http\Controllers\Expenses\DeleteExpenseController;
 use App\Http\Controllers\Expenses\ListExpensesController;
 use App\Http\Controllers\Expenses\ShowExpenseController;
 use App\Http\Controllers\Expenses\UpdateExpenseController;
+use App\Http\Controllers\Stats\StatsByCategoryController;
+use App\Http\Controllers\Stats\StatsSummaryController;
+use App\Http\Controllers\Stats\StatsTimeseriesController;
 use Illuminate\Support\Facades\Route;
 
 // Served under /api/v1 (see bootstrap/app.php).
@@ -57,4 +60,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             Route::delete('/', DeleteExpenseController::class);
         });
     });
+});
+
+// Read-only aggregates: their own, separate rate limit so a dashboard cannot starve the CRUD budget.
+Route::middleware(['auth:sanctum', 'throttle:stats'])->prefix('stats')->group(function (): void {
+    Route::get('summary', StatsSummaryController::class);
+    Route::get('by-category', StatsByCategoryController::class);
+    Route::get('timeseries', StatsTimeseriesController::class);
 });

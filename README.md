@@ -63,6 +63,7 @@ Copy `.env.example`; notable settings:
 | `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = never) |
 | `THROTTLE_LOGIN_PER_MINUTE` | `5` | Login attempts per email and IP |
 | `THROTTLE_REGISTER_PER_MINUTE` | `10` | Registrations per IP |
+| `THROTTLE_STATS_PER_MINUTE` | `120` | Statistics requests per user |
 | `LOG_CHANNEL` | `json` | JSON lines on stderr, each with `request_id` |
 
 Supported languages are listed in `config/locales.php`; add a folder under `lang/` and one entry there.

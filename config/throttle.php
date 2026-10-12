@@ -10,4 +10,5 @@ return [
     'login' => (int) env('THROTTLE_LOGIN_PER_MINUTE', 5),
     'register' => (int) env('THROTTLE_REGISTER_PER_MINUTE', 10),
     'api' => (int) env('THROTTLE_API_PER_MINUTE', 120),
+    'stats' => (int) env('THROTTLE_STATS_PER_MINUTE', 120),
 ];
