@@ -14,6 +14,10 @@ use App\Http\Controllers\Categories\ListCategoriesController;
 use App\Http\Controllers\Categories\ShowCategoryController;
 use App\Http\Controllers\Categories\UnarchiveCategoryController;
 use App\Http\Controllers\Categories\UpdateCategoryController;
+use App\Http\Controllers\Expenses\CreateExpenseController;
+use App\Http\Controllers\Expenses\DeleteExpenseController;
+use App\Http\Controllers\Expenses\ShowExpenseController;
+use App\Http\Controllers\Expenses\UpdateExpenseController;
 use Illuminate\Support\Facades\Route;
 
 // Served under /api/v1 (see bootstrap/app.php).
@@ -39,6 +43,16 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             Route::delete('/', DeleteCategoryController::class);
             Route::post('archive', ArchiveCategoryController::class);
             Route::post('unarchive', UnarchiveCategoryController::class);
+        });
+    });
+
+    Route::prefix('expenses')->group(function (): void {
+        Route::post('/', CreateExpenseController::class);
+
+        Route::prefix('{expense}')->whereUuid('expense')->group(function (): void {
+            Route::get('/', ShowExpenseController::class);
+            Route::put('/', UpdateExpenseController::class);
+            Route::delete('/', DeleteExpenseController::class);
         });
     });
 });
