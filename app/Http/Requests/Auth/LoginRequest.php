@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Requests\Auth;
 
 use App\Data\LoginData;
+use App\Support\Auth\EmailKey;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 
 final class LoginRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        $email = $this->input('email');
+        $email = EmailKey::normalise($this->input('email'));
 
-        if (is_string($email)) {
-            $this->merge(['email' => Str::lower(trim($email))]);
+        if ($email !== null) {
+            $this->merge(['email' => $email]);
         }
     }
 
