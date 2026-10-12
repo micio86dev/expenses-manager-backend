@@ -21,6 +21,9 @@ Commit messages follow Conventional Commits, without AI attribution lines.
 | `make typecheck` | Larastan at level `max` |
 | `make format` | Pint, writes fixes |
 
+CI (`.github/workflows/backend.yml`, manual trigger until a remote exists) runs the same targets
+(`make lint`, `make typecheck`, `make coverage`) plus `composer audit`.
+
 Enable the repository hooks once with `git config core.hooksPath .githooks`
 (`commit-msg` checks Conventional Commits; `pre-commit` runs lint and typecheck when PHP files are staged).
 
