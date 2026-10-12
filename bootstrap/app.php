@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\SetLocale;
 use App\Support\Problem\ProblemDetailsRenderer;
 use Illuminate\Foundation\Application;
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append([SetLocale::class]);
+        $middleware->append([AssignRequestId::class, SetLocale::class]);
 
         // Unauthenticated requests get a 401 problem response, never a redirect.
         $middleware->redirectGuestsTo(fn (): ?string => null);
