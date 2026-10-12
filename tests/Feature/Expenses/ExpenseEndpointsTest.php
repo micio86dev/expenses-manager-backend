@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\User;
 use Database\Seeders\Reference\ReferenceSeeder;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -61,10 +62,10 @@ describe('create', function (): void {
     });
 
     it('stores other currencies and the largest amounts as integers', function (): void {
-        $this->postJson('/api/v1/expenses', expensePayload(['currency' => 'USD', 'amount_cents' => 9_007_199_254_740_993]))
+        $this->postJson('/api/v1/expenses', expensePayload(['currency' => 'USD', 'amount_cents' => 99_999_999_999]))
             ->assertCreated()
             ->assertJsonPath('data.currency', 'USD')
-            ->assertJsonPath('data.amount_cents', 9_007_199_254_740_993);
+            ->assertJsonPath('data.amount_cents', 99_999_999_999);
     });
 
     it('rejects invalid input', function (array $overrides, string $field): void {
@@ -77,6 +78,7 @@ describe('create', function (): void {
         'blank description' => [['description' => '   '], 'description'],
         'description too long' => [['description' => str_repeat('a', 256)], 'description'],
         'zero amount' => [['amount_cents' => 0], 'amount_cents'],
+        'amount above the maximum' => [['amount_cents' => 100_000_000_000], 'amount_cents'],
         'negative amount' => [['amount_cents' => -5], 'amount_cents'],
         'fractional amount' => [['amount_cents' => 10.5], 'amount_cents'],
         'amount as string' => [['amount_cents' => '1000'], 'amount_cents'],
@@ -225,5 +227,54 @@ describe('delete', function (): void {
         $this->deleteJson("/api/v1/expenses/{$bobs->id}")->assertNotFound()->assertValidResponse(404);
 
         expect(Expense::query()->withoutGlobalScopes()->find($bobs->id))->not->toBeNull();
+    });
+});
+
+describe('summing the largest amounts', function (): void {
+    it('keeps the statistics of a maximum-size expense over a long range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['amount_cents' => 99_999_999_999, 'spent_on' => '2026-10-12']))->assertCreated();
+
+        $this->getJson('/api/v1/stats/summary?from=2021-10-13&to=2026-10-12')
+            ->assertOk()
+            ->assertValidResponse(200)
+            ->assertJsonPath('data.total_cents', 99_999_999_999)
+            ->assertJsonPath('data.daily_average_cents', 54_764_513);
+    });
+});
+
+describe('calendar date storage', function (): void {
+    it('stores spent_on as a plain calendar date', function (): void {
+        $id = $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12']))
+            ->assertCreated()
+            ->json('data.id');
+
+        $raw = DB::table('expenses')->where('id', $id)->value('spent_on');
+
+        expect($raw)->toBe('2026-10-12');
+
+        $this->putJson("/api/v1/expenses/{$id}", expensePayload(['spent_on' => '2026-10-13']))->assertOk();
+
+        expect(DB::table('expenses')->where('id', $id)->value('spent_on'))->toBe('2026-10-13');
+    });
+
+    it('lists an expense on the last day of a range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12']))->assertCreated();
+
+        $this->getJson('/api/v1/expenses?from=2026-10-12&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    });
+
+    it('counts an expense created through the api on the last day of a stats range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12', 'amount_cents' => 700]))->assertCreated();
+
+        $this->getJson('/api/v1/stats/summary?from=2026-10-12&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonPath('data.total_cents', 700)
+            ->assertJsonPath('data.count', 1);
+
+        $this->getJson('/api/v1/stats/summary?from=2026-10-01&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonPath('data.total_cents', 700);
     });
 });

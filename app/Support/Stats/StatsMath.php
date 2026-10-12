@@ -23,7 +23,10 @@ final class StatsMath
             throw new InvalidArgumentException('The average needs at least one day.');
         }
 
-        return intdiv(2 * $totalCents + $days, 2 * $days);
+        // Quotient and remainder instead of `2 * total + days`, which overflows near PHP_INT_MAX.
+        $quotient = intdiv($totalCents, $days);
+
+        return 2 * ($totalCents % $days) >= $days ? $quotient + 1 : $quotient;
     }
 
     /**

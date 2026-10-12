@@ -13,6 +13,8 @@ it('averages per day rounding half up on integers', function (int $total, int $d
     'half rounds up' => [5, 2, 3],
     'nothing spent' => [0, 31, 0],
     'single day' => [1234, 1, 1234],
+    'total near the integer limit' => [PHP_INT_MAX, 1, PHP_INT_MAX],
+    'huge total rounds half up' => [PHP_INT_MAX - 1, 2, 4_611_686_018_427_387_903],
 ]);
 
 it('refuses to average over less than one day', function (): void {

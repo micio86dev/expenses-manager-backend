@@ -69,7 +69,24 @@ Probes `GET /health` and `GET /ready` live outside `/api/v1` (`routes/health.php
 - Migrations are schema only. Data goes in seeders.
 - Statistics are cached by `CacheStatsResponse` under the owner's `StatsVersion`; never invalidate by key
   or tag, write through models so `StatsInvalidationObserver` bumps the version (query-builder bulk writes must bump it explicitly).
-- Rate limits are named limiters (`login`, `register`, `api`, `stats`) tuned in `config/throttle.php`.
+- Rate limits are named limiters (`login` has two buckets: email+IP and IP alone; `register`, `api`, `stats`) tuned in `config/throttle.php`.
+  Login keys use `EmailKey::normalise()`, the same normalisation as `LoginRequest`.
+
+## Known limits (follow-ups)
+
+Deliberately not fixed yet; each needs a product or infrastructure decision.
+
+- Statistics cache growth: entries live in the `database` cache store under a versioned key and are only
+  superseded, never deleted early. Expired rows are not pruned automatically. Follow-up: a scheduled prune
+  or a cache store with native eviction (Redis).
+- `q` filter on the expense list: `%` and `_` typed by the user act as `LIKE` wildcards. Follow-up: escape
+  them in the repository once the desired search semantics are decided.
+- Category names are unique per owner by validation only. Two concurrent requests can both pass the check
+  and create duplicates. Follow-up: a unique index on `(owner_id, name)` plus a conflict response.
+- Registration reveals whether an email is taken (422). Inherent to open sign-up with email as identity;
+  mitigated by the per-IP `register` throttle.
+- `TRUSTED_PROXIES` must be set behind a load balancer; empty trusts no proxy, so IP-based limits then see
+  the proxy address. Expired Sanctum tokens are pruned by the scheduler (`schedule:run` must be cron-ed).
 
 ## Testing
 

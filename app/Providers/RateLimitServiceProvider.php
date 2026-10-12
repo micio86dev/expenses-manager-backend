@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\User;
+use App\Support\Auth\EmailKey;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 final class RateLimitServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
         // Limits are read per request so they can be tuned (and tested) through config/throttle.php.
-        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(config()->integer('throttle.login'))
-            ->by(Str::lower($request->string('email')->toString()).'|'.$this->clientIp($request)));
+        // Two buckets: one account from one IP, and one IP across all accounts (password spraying).
+        RateLimiter::for('login', fn (Request $request): array => [
+            Limit::perMinute(config()->integer('throttle.login'))
+                ->by('login|'.(EmailKey::normalise($request->input('email')) ?? '-').'|'.$this->clientIp($request)),
+            Limit::perMinute(config()->integer('throttle.login_ip'))
+                ->by('login-ip|'.$this->clientIp($request)),
+        ]);
 
         RateLimiter::for('register', fn (Request $request): Limit => Limit::perMinute(config()->integer('throttle.register'))
             ->by($this->clientIp($request)));

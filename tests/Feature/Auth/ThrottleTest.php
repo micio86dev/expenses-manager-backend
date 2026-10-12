@@ -46,3 +46,35 @@ it('throttles registrations per ip', function (): void {
         'password' => 'correct horse battery',
     ])->assertStatus(429)->assertValidResponse(429)->assertHeader('Retry-After');
 });
+
+it('shares one login bucket between whitespace and case variants of an email', function (): void {
+    config(['throttle.login' => 2]);
+
+    foreach (['ada@example.com', ' ADA@example.com'] as $email) {
+        $this->postJson('/api/v1/auth/login', ['email' => $email, 'password' => 'wrong-password'])->assertUnauthorized();
+    }
+
+    $this->postJson('/api/v1/auth/login', ['email' => "\tAda@example.com\n", 'password' => 'wrong-password'])->assertStatus(429);
+});
+
+it('throttles login attempts per ip across different emails', function (): void {
+    config(['throttle.login' => 100, 'throttle.login_ip' => 3]);
+
+    foreach (['a', 'b', 'c'] as $name) {
+        $this->postJson('/api/v1/auth/login', ['email' => "{$name}@example.com", 'password' => 'wrong-password'])->assertUnauthorized();
+    }
+
+    $this->postJson('/api/v1/auth/login', ['email' => 'd@example.com', 'password' => 'wrong-password'])
+        ->assertStatus(429)
+        ->assertValidResponse(429);
+});
+
+it('answers a malformed email with a validation error instead of failing', function (mixed $email): void {
+    $this->postJson('/api/v1/auth/login', ['email' => $email, 'password' => 'wrong-password'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('email');
+})->with([
+    'array' => [['x']],
+    'nested array' => [[['x']]],
+    'object' => [['a' => 'b']],
+]);

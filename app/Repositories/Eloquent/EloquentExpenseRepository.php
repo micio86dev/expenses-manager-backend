@@ -10,6 +10,7 @@ use App\Data\ExpensePage;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Expense;
 use App\Repositories\Contracts\ExpenseRepository;
+use App\Support\DateRange;
 
 final class EloquentExpenseRepository implements ExpenseRepository
 {
@@ -72,7 +73,8 @@ final class EloquentExpenseRepository implements ExpenseRepository
             'amount_cents' => $data->price->amountCents,
             'currency' => $data->price->currency,
             'category_id' => $data->categoryId,
-            'spent_on' => $data->spentOn,
+            // A plain Y-m-d string: a Carbon instance would be stored with a time and drop out of textual range filters.
+            'spent_on' => $data->spentOn->format(DateRange::FORMAT),
         ];
     }
 }

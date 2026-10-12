@@ -73,13 +73,15 @@ have their own rate limit (`THROTTLE_STATS_PER_MINUTE`).
 
 ## Configuration
 
-Copy `.env.example`; notable settings:
+Copy `.env.example` (`make setup` does it for local development, switching to `APP_ENV=local` and `APP_DEBUG=true`; the file itself holds production-safe values). Notable settings:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `DB_CONNECTION` | `sqlite` | Database engine |
-| `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = never) |
+| `TRUSTED_PROXIES` | empty | Comma-separated IPs or CIDR ranges of the reverse proxies allowed to set `X-Forwarded-*`; empty trusts none. Set it behind a load balancer so IP-based rate limits see the real client |
+| `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = 30 days); expired tokens are pruned daily by the scheduler |
 | `THROTTLE_LOGIN_PER_MINUTE` | `5` | Login attempts per email and IP |
+| `THROTTLE_LOGIN_IP_PER_MINUTE` | `30` | Login attempts per IP across all emails |
 | `THROTTLE_REGISTER_PER_MINUTE` | `10` | Registrations per IP |
 | `THROTTLE_STATS_PER_MINUTE` | `120` | Statistics requests per user |
 | `LOG_CHANNEL` | `json` | JSON lines on stderr, each with `request_id` |

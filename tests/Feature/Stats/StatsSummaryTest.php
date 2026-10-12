@@ -147,3 +147,9 @@ it('explains the span limit in the request locale', function (string $locale, st
     'english' => ['en', 'The date range cannot be longer than 5 years.'],
     'italian' => ['it', 'L\'intervallo di date non può superare 5 anni.'],
 ]);
+
+it('summarises the longest valid range without failing on its previous period', function (): void {
+    $this->getJson('/api/v1/stats/summary?from=2020-02-01&to=2025-01-31')
+        ->assertOk()
+        ->assertValidResponse(200);
+});
