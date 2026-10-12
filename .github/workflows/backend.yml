@@ -107,5 +107,5 @@ jobs:
         run: |
           git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git "$RUNNER_TEMP/gga" && git -C "$RUNNER_TEMP/gga" checkout --quiet fbf1091da170a33d42cb97577a9813e652e98a4a
           (cd "$RUNNER_TEMP/gga" && ./install.sh)
-          echo "/.local/bin" >> ""
+          for dir in "$HOME/bin" /usr/local/bin "$HOME/.local/bin"; do [[ -x "$dir/gga" ]] && echo "$dir" >> "$GITHUB_PATH" && break; done
       - run: gga run --ci
