@@ -8,7 +8,7 @@ help: ## Show available targets
 
 setup: ## Install dependencies, create .env, generate the app key and migrate
 	composer install
-	@test -f .env || cp .env.example .env
+	@test -f .env || sed -e 's/^APP_ENV=.*/APP_ENV=local/' -e 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env.example > .env
 	php artisan key:generate --ansi
 	@mkdir -p database && touch database/database.sqlite
 	php artisan migrate --force
