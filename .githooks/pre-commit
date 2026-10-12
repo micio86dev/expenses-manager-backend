@@ -9,3 +9,11 @@ if git diff --cached --name-only --diff-filter=ACMR | grep -Eq '\.php$|^composer
     make lint
     make typecheck
 fi
+
+# Guardian Angel review runs last, after the cheap deterministic gates.
+# Not installed through `gga install`: core.hooksPath points here, so it is called explicitly.
+if command -v gga >/dev/null 2>&1; then
+    gga run
+else
+    echo "pre-commit: 'gga' not found, skipping the Guardian Angel review (see README: Engram and Guardian Angel)." >&2
+fi
