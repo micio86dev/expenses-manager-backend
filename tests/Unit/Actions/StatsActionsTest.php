@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stats\GetCategoryStats;
 use App\Actions\Stats\GetStatsSummary;
 use App\Actions\Stats\GetTimeseries;
+use App\Actions\Stats\GetTopExpenses;
 use App\Data\Stats\StatsQuery;
 use App\Support\DateRange;
 use App\Support\Periods\Period;
@@ -126,5 +127,19 @@ describe('GetTimeseries', function (): void {
     it('rejects a period that cannot bucket a time series', function (): void {
         expect(fn () => (new GetTimeseries(new InMemoryStatsRepository, new PeriodResolver))(statsQuery('2026-10-01', '2026-10-02'), Period::Custom))
             ->toThrow(InvalidArgumentException::class);
+    });
+});
+
+describe('GetTopExpenses', function (): void {
+    it('returns the largest expenses of the currency, capped by the limit', function (): void {
+        $repository = (new InMemoryStatsRepository)
+            ->spend('2026-10-01', 100)
+            ->spend('2026-10-02', 900)
+            ->spend('2026-10-03', 500)
+            ->spend('2026-10-04', 9999, 'Food', 'USD');
+
+        $top = (new GetTopExpenses($repository))(statsQuery('2026-10-01', '2026-10-31'), 2);
+
+        expect(array_map(fn ($expense): int => $expense->amount_cents, $top))->toBe([900, 500]);
     });
 });

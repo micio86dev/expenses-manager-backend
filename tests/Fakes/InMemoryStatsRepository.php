@@ -99,6 +99,24 @@ final class InMemoryStatsRepository implements StatsRepository
         ]);
     }
 
+    public function topExpenses(StatsQuery $query, int $limit): array
+    {
+        $rows = $this->within($query);
+
+        usort($rows, static fn (array $a, array $b): int => [$b['cents'], $b['day'], $b['id']] <=> [$a['cents'], $a['day'], $a['id']]);
+
+        return array_map(
+            static fn (array $row): Expense => (new Expense)->forceFill([
+                'id' => $row['id'],
+                'amount_cents' => $row['cents'],
+                'currency' => $row['currency'],
+                'category_id' => $row['categoryId'],
+                'spent_on' => CarbonImmutable::parse($row['day']),
+            ]),
+            array_slice($rows, 0, $limit),
+        );
+    }
+
     /**
      * @return list<array{id: string, day: string, cents: int, currency: string, categoryId: string, category: string}>
      */

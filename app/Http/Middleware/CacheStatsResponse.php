@@ -24,7 +24,7 @@ final readonly class CacheStatsResponse
     public const int TTL_SECONDS = 3600;
 
     /** Query parameters that shape a statistic; anything else must not create cache entries. */
-    private const array QUERY_PARAMETERS = ['currency', 'from', 'granularity', 'to'];
+    private const array QUERY_PARAMETERS = ['currency', 'from', 'granularity', 'limit', 'to'];
 
     public function __construct(
         private CurrentOwner $owner,

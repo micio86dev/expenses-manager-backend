@@ -22,6 +22,7 @@ use App\Http\Controllers\Expenses\UpdateExpenseController;
 use App\Http\Controllers\Stats\StatsByCategoryController;
 use App\Http\Controllers\Stats\StatsSummaryController;
 use App\Http\Controllers\Stats\StatsTimeseriesController;
+use App\Http\Controllers\Stats\StatsTopExpensesController;
 use App\Http\Middleware\AddStatsEtag;
 use App\Http\Middleware\CacheStatsResponse;
 use Illuminate\Support\Facades\Route;
@@ -69,4 +70,5 @@ Route::middleware(['auth:sanctum', 'throttle:stats', AddStatsEtag::class, CacheS
     Route::get('summary', StatsSummaryController::class);
     Route::get('by-category', StatsByCategoryController::class);
     Route::get('timeseries', StatsTimeseriesController::class);
+    Route::get('top-expenses', StatsTopExpensesController::class);
 });
