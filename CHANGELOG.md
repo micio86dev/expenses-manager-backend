@@ -1,0 +1,51 @@
+# Changelog
+
+## [0.1.0] - 2026-10-12
+
+- fix(database): wait on sqlite locks and use wal
+- fix(http): restrict cors to configured origins and expose etag
+- chore(env): drop unused BROADCAST_CONNECTION
+- docs(backend): document commands, env and endpoints
+- chore(deps): add dependabot config
+- ci(backend): add dormant workflow
+- feat(stats): add top expenses endpoint
+- chore(contract): sync top expenses endpoint
+- chore(hooks): activate repository hooks from make setup
+- fix(docker): give the dev sqlite volume to www-data
+- docs: document review follow-ups
+- fix(stats): vary statistics responses on Accept-Language
+- fix(http): configure trusted proxies from env
+- fix(auth): expire tokens by default and prune them
+- docs(auth): document the login ip limit
+- fix(auth): normalise login throttle keys and add ip limit
+- fix(expenses): bound amount_cents and guard daily average
+- fix(stats): exclude previous period from span guard
+- fix(expenses): persist spent_on as a calendar date
+- fix(contract): document 429 for stats operations
+- test(stats): cover query counts, indexes, lazy loading and architecture
+- feat(stats): add etag and rate limiting
+- feat(stats): add owner-scoped versioned cache
+- feat(stats): add summary, by-category and timeseries endpoints
+- feat(stats): add period resolver, date range helpers and stats math
+- fix(contract): document 403 for archive and unarchive
+- test(arch): cover value objects, enums and validation rules
+- feat(database): seed demo categories and expenses across months
+- feat(expenses): add filtered paginated listing
+- feat(expenses): add expense crud with ownership
+- feat(categories): add custom category crud
+- feat(categories): add system reference categories
+- docs: describe the backend foundation
+- chore(hooks): add conventional commit and quality gate hooks
+- chore(docker): add multi-stage backend image
+- test(contract): prove the validator enforces the openapi 3.1 contract
+- test(arch): enforce strict types, layering and persistence boundaries
+- feat(database): add reference and demo seeders
+- feat(logging): add request ids and json logs
+- feat(health): add health and readiness probes
+- feat(ownership): scope rows to the current owner
+- feat(auth): add sanctum registration and login
+- feat(errors): render rfc 9457 problem details
+- feat(i18n): resolve locale from accept-language
+- chore: scaffold laravel 13 application
+- chore: initialize backend repository
+

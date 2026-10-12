@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Runs the style and static analysis gates when PHP files are staged.
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+if git diff --cached --name-only --diff-filter=ACMR | grep -Eq '\.php$|^composer\.(json|lock)$|^phpstan\.neon\.dist$|^pint\.json$'; then
+    make lint
+    make typecheck
+fi
