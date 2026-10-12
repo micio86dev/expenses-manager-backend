@@ -38,6 +38,34 @@ final readonly class DateRange
         return new self(self::day($from), self::day($to));
     }
 
+    /**
+     * The number of calendar days in the range, both ends included (at least 1).
+     */
+    public function days(): int
+    {
+        // Rounded because a day is not always 24 hours in a non-UTC timezone.
+        return (int) round($this->from->diffInDays($this->to)) + 1;
+    }
+
+    /**
+     * The range of the same length that ends the day before this one starts.
+     */
+    public function previous(): self
+    {
+        $to = $this->from->subDay();
+
+        return new self($to->subDays($this->days() - 1), $to);
+    }
+
+    /**
+     * Whether the range is longer than the given number of calendar years.
+     * Five years from 2021-01-01 end on 2025-12-31; a leap day anchors to the last day of February.
+     */
+    public function exceedsYears(int $years): bool
+    {
+        return $this->to->greaterThan($this->from->addYearsNoOverflow($years)->subDay());
+    }
+
     public function contains(CarbonImmutable $day): bool
     {
         $day = $day->startOfDay();

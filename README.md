@@ -46,12 +46,30 @@ Or run the whole stack with Docker from the superproject (`make up`).
 | POST | `/api/v1/auth/logout` | 204, revokes the current token |
 | GET | `/api/v1/auth/me` | Signed-in user |
 | PATCH | `/api/v1/auth/me` | Update `name` and/or `locale` |
+| GET | `/api/v1/stats/summary` | Total, count, daily average, change vs the previous period, top category, biggest expense |
+| GET | `/api/v1/stats/by-category` | Totals and share per category, largest first |
+| GET | `/api/v1/stats/timeseries` | Continuous day, ISO week (Monday) or month buckets (`granularity`) |
 | GET | `/health` | Liveness, `{status: "ok"}` |
 | GET | `/ready` | Readiness, 503 problem when the database is unavailable |
 
 Authenticate with `Authorization: Bearer <token>`. Send `Accept-Language: it|en` to localize messages.
 Every error is `application/problem+json` (RFC 9457) with a localized `title` and `detail`, and
 `errors` keyed by field on 422. Rate-limited responses carry `Retry-After`.
+
+### Statistics
+
+All three take `from` and `to` (inclusive, `Y-m-d`, at most 5 years apart, otherwise 422) and an optional
+`currency` (default `EUR`); currencies are never mixed. The daily average is the total divided by the
+number of days in the range, rounded half up on integers. The previous period is the range of equal
+length that ends the day before `from`; its change is `null` when it has no spending. Percentages have
+two decimals. Week and month buckets are summed in PHP from per-day SQL aggregates (portable on every
+database); a week or month that starts before `from` is still labelled by its first day but only holds
+days inside the range.
+
+Responses are cached per owner for one hour under a version key (`stats:version:{owner}`) that every
+expense or category write replaces, so invalidation works on any cache driver. Each response carries a
+strong `ETag` (quoted SHA-256 of the body); a matching `If-None-Match` gets an empty 304. Statistics
+have their own rate limit (`THROTTLE_STATS_PER_MINUTE`).
 
 ## Configuration
 
@@ -63,6 +81,7 @@ Copy `.env.example`; notable settings:
 | `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = never) |
 | `THROTTLE_LOGIN_PER_MINUTE` | `5` | Login attempts per email and IP |
 | `THROTTLE_REGISTER_PER_MINUTE` | `10` | Registrations per IP |
+| `THROTTLE_STATS_PER_MINUTE` | `120` | Statistics requests per user |
 | `LOG_CHANNEL` | `json` | JSON lines on stderr, each with `request_id` |
 
 Supported languages are listed in `config/locales.php`; add a folder under `lang/` and one entry there.

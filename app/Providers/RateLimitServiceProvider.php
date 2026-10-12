@@ -28,6 +28,13 @@ final class RateLimitServiceProvider extends ServiceProvider
             return Limit::perMinute(config()->integer('throttle.api'))
                 ->by($user instanceof User ? $user->id : $this->clientIp($request));
         });
+
+        RateLimiter::for('stats', function (Request $request): Limit {
+            $user = $request->user('sanctum');
+
+            return Limit::perMinute(config()->integer('throttle.stats'))
+                ->by($user instanceof User ? $user->id : $this->clientIp($request));
+        });
     }
 
     private function clientIp(Request $request): string

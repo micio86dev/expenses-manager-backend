@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\ExpenseFilter;
+use App\Observers\StatsInvalidationObserver;
 use App\Support\DateRange;
 use App\Support\Owner\OwnedByCurrentOwner;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  */
 #[Fillable(['description', 'amount_cents', 'currency', 'category_id', 'spent_on'])]
+#[ObservedBy(StatsInvalidationObserver::class)]
 final class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */

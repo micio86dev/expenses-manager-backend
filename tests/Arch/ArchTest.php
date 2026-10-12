@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Support\Periods\PeriodStrategy;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 arch('every source file declares strict types')
@@ -24,6 +25,22 @@ arch('value objects are final, readonly and know nothing about the framework lay
     ->toBeFinal()
     ->toBeReadonly()
     ->not->toUse(['Illuminate\Http', 'Illuminate\Database', 'App\Models']);
+
+arch('period strategies are final, readonly and know nothing about the framework layers')
+    ->expect('App\Support\Periods')
+    ->classes()
+    ->toBeFinal()
+    ->toBeReadonly()
+    ->not->toUse(['Illuminate\Http', 'Illuminate\Database', 'App\Models']);
+
+arch('every concrete period strategy implements the strategy contract')
+    ->expect([
+        'App\Support\Periods\DayPeriod',
+        'App\Support\Periods\WeekPeriod',
+        'App\Support\Periods\MonthPeriod',
+        'App\Support\Periods\CustomPeriod',
+    ])
+    ->toImplement(PeriodStrategy::class);
 
 arch('enums are enums')
     ->expect('App\Enums')
@@ -102,6 +119,7 @@ arch('models are only referenced by layers that pass them around, never by contr
         'App\Http\Requests',
         'App\Http\Resources',
         'App\Http\Middleware',
+        'App\Observers',
         'App\Providers',
         'App\Repositories',
         'Database',

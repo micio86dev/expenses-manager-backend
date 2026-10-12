@@ -40,3 +40,34 @@ it('is immutable', function (): void {
 
     expect(fn () => $range->from = CarbonImmutable::now())->toThrow(Error::class);
 });
+
+it('counts its inclusive days', function (string $from, string $to, int $days): void {
+    expect(DateRange::fromStrings($from, $to)->days())->toBe($days);
+})->with([
+    'single day' => ['2026-10-12', '2026-10-12', 1],
+    'a month' => ['2026-10-01', '2026-10-31', 31],
+    'leap february' => ['2024-02-01', '2024-02-29', 29],
+    'across the year end' => ['2026-12-30', '2027-01-02', 4],
+]);
+
+it('derives the previous period of equal length ending the day before it starts', function (string $from, string $to, string $prevFrom, string $prevTo): void {
+    $previous = DateRange::fromStrings($from, $to)->previous();
+
+    expect($previous->from->toDateString())->toBe($prevFrom)
+        ->and($previous->to->toDateString())->toBe($prevTo);
+})->with([
+    'single day' => ['2026-10-12', '2026-10-12', '2026-10-11', '2026-10-11'],
+    'a week' => ['2026-10-12', '2026-10-18', '2026-10-05', '2026-10-11'],
+    'a month does not become the calendar month before' => ['2026-10-01', '2026-10-31', '2026-08-31', '2026-09-30'],
+    'across the year end' => ['2027-01-01', '2027-01-03', '2026-12-29', '2026-12-31'],
+]);
+
+it('knows when it spans more than a number of years', function (string $from, string $to, bool $exceeds): void {
+    expect(DateRange::fromStrings($from, $to)->exceedsYears(5))->toBe($exceeds);
+})->with([
+    'exactly five years' => ['2021-01-01', '2025-12-31', false],
+    'one day more' => ['2021-01-01', '2026-01-01', true],
+    'short' => ['2026-10-01', '2026-10-31', false],
+    'leap day start' => ['2024-02-29', '2029-02-27', false],
+    'leap day start plus one' => ['2024-02-29', '2029-02-28', true],
+]);

@@ -33,12 +33,15 @@ Request flow: `routes` → middleware → **Controller** → **FormRequest** (in
 | `app/Http/Controllers` | Single-action, thin. Depend only on Actions, FormRequests and Resources. |
 | `app/Http/Requests` | Validation and mapping to DTOs. |
 | `app/Http/Resources` | Output shape, matches the contract. |
-| `app/Http/Middleware` | `AssignRequestId` (X-Request-Id and log context), `SetLocale`. |
+| `app/Http/Middleware` | `AssignRequestId` (X-Request-Id and log context), `SetLocale`, `CacheStatsResponse` and `AddStatsEtag` (statistics routes). |
 | `app/Actions` | One use case per class. Know nothing about HTTP or Eloquent. |
 | `app/Data` | `final readonly` DTOs. |
 | `app/Repositories/Contracts` | Persistence interfaces used by Actions. |
 | `app/Repositories/Eloquent` | The only place that builds queries (plus models and `Support/Owner`). |
 | `app/Models` | Eloquent models. UUID keys. |
+| `app/Observers` | `StatsInvalidationObserver`: the one place that bumps an owner's statistics version after expense or category writes. |
+| `app/Support/Periods` | `Period` enum, `PeriodResolver` and one strategy per period (day, ISO week, month, custom). Only place that buckets dates. |
+| `app/Support/Stats` | `StatsVersion` (per-owner cache version token) and `StatsMath` (rounding rules). |
 | `app/Support/Owner` | `CurrentOwner` contract, `OwnedByCurrentOwner` trait, `OwnerScope`. |
 | `app/Support/Problem` | RFC 9457 Problem Details renderer (wired in `bootstrap/app.php`). |
 | `app/Support/Locale` | `LocaleRegistry` over `config/locales.php`. |
@@ -54,6 +57,9 @@ Probes `GET /health` and `GET /ready` live outside `/api/v1` (`routes/health.php
 - `declare(strict_types=1)` in every file; classes are `final`; DTOs are `readonly`; enums for fixed sets.
 - Eloquent and the query builder only. No raw SQL, no dialect functions, no JSON-column queries.
   The database engine is selected only through `.env` (SQLite by default).
+  Named exception: `EloquentStatsRepository` passes the standard aggregates `SUM(amount_cents)` and
+  `COUNT(*)` to `selectRaw`; the query builder has no non-raw way to select a grouped aggregate.
+  Date bucketing stays in PHP (`PeriodResolver`).
 - Money is integer minor units plus ISO currency. IDs are UUIDs.
 - Every domain table has `owner_id`; models use `OwnedByCurrentOwner`. Moving from users to tenants
   is one change: the `CurrentOwner` binding in `AppServiceProvider`.
@@ -61,7 +67,9 @@ Probes `GET /health` and `GET /ready` live outside `/api/v1` (`routes/health.php
   messages never reach the client.
 - User-facing strings live in `lang/`; add a locale by adding a folder and one entry in `config/locales.php`.
 - Migrations are schema only. Data goes in seeders.
-- Rate limits are named limiters (`login`, `register`, `api`) tuned in `config/throttle.php`.
+- Statistics are cached by `CacheStatsResponse` under the owner's `StatsVersion`; never invalidate by key
+  or tag, write through models so `StatsInvalidationObserver` bumps the version (query-builder bulk writes must bump it explicitly).
+- Rate limits are named limiters (`login`, `register`, `api`, `stats`) tuned in `config/throttle.php`.
 
 ## Testing
 

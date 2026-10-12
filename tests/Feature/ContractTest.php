@@ -40,6 +40,7 @@ it('implements every operation of the contract that has shipped', function (): v
     $implemented = [
         '/auth/register', '/auth/login', '/auth/logout', '/auth/me', '/health', '/ready',
         '/categories', '/categories/{category}', '/categories/{category}/archive', '/categories/{category}/unarchive',
+        '/stats/summary', '/stats/by-category', '/stats/timeseries',
     ];
     $contractOperations = collect(Spectator::resolve()->paths)
         ->flatMap(fn ($item, string $path): array => collect($item->getOperations())
@@ -117,6 +118,29 @@ it('validates 3.1 type arrays that include null', function (): void {
 
     expect(fn () => ResponseValidator::validate(new JsonResponse($badTopCategory), $operation, '3.1.0'))
         ->toThrow(ResponseValidationException::class);
+});
+
+it('describes 304 as an empty response for every statistics endpoint', function (string $path): void {
+    $operation = contractOperation($path, 'GET');
+
+    ResponseValidator::validate(new Response('', 304), $operation, '3.1.0');
+
+    expect(fn () => ResponseValidator::validate(new JsonResponse(['data' => []], 304), $operation, '3.1.0'))
+        ->toThrow(ResponseValidationException::class);
+})->with(['/stats/summary', '/stats/by-category', '/stats/timeseries']);
+
+it('validates the category and time series statistics shapes', function (): void {
+    $category = ['category_id' => '0199c0a6-5b3b-7000-8000-000000000001', 'name' => 'Food', 'total_cents' => 100, 'count' => 1, 'share_percent' => 100.0];
+    $bucket = ['period_start' => '2026-10-01', 'total_cents' => 0, 'count' => 0];
+
+    ResponseValidator::validate(new JsonResponse(['data' => [$category]]), contractOperation('/stats/by-category', 'GET'), '3.1.0');
+    ResponseValidator::validate(new JsonResponse(['data' => [$bucket]]), contractOperation('/stats/timeseries', 'GET'), '3.1.0');
+
+    $badCategory = fn () => ResponseValidator::validate(new JsonResponse(['data' => [[...$category, 'share_percent' => 'half']]]), contractOperation('/stats/by-category', 'GET'), '3.1.0');
+    $badBucket = fn () => ResponseValidator::validate(new JsonResponse(['data' => [['total_cents' => 0, 'count' => 0]]]), contractOperation('/stats/timeseries', 'GET'), '3.1.0');
+
+    expect($badCategory)->toThrow(ResponseValidationException::class)
+        ->and($badBucket)->toThrow(ResponseValidationException::class);
 });
 
 it('keeps the backend copy of the contract in sync with the superproject', function (): void {

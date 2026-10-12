@@ -22,9 +22,14 @@ final readonly class Money
             throw new InvalidArgumentException('Money must be a positive amount of minor units.');
         }
 
-        if (preg_match('/^[A-Z]{3}$/', $currency) !== 1) {
+        if (! self::isCurrencyCode($currency)) {
             throw new InvalidArgumentException('Currency must be an uppercase ISO 4217 code.');
         }
+    }
+
+    public static function isCurrencyCode(string $currency): bool
+    {
+        return preg_match('/^[A-Z]{3}$/', $currency) === 1;
     }
 
     public function equals(self $other): bool
