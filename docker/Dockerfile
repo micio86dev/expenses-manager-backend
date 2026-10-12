@@ -35,6 +35,9 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN apk add --no-cache git unzip \
     && cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY docker/php/dev.ini "$PHP_INI_DIR/conf.d/zz-app.ini"
+# The sqlite named volume copies this ownership on first creation, so PHP-FPM (www-data) can write.
+RUN mkdir -p /var/www/html/database/sqlite /var/www/html/storage \
+    && chown -R www-data:www-data /var/www/html/database/sqlite /var/www/html/storage
 
 # ---------------------------------------------------------------------------
 # test: dev + PCOV, dependencies installed from the lock file
