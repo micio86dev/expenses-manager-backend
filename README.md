@@ -80,6 +80,7 @@ Copy `.env.example`; notable settings:
 | `DB_CONNECTION` | `sqlite` | Database engine |
 | `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = never) |
 | `THROTTLE_LOGIN_PER_MINUTE` | `5` | Login attempts per email and IP |
+| `THROTTLE_LOGIN_IP_PER_MINUTE` | `30` | Login attempts per IP across all emails |
 | `THROTTLE_REGISTER_PER_MINUTE` | `10` | Registrations per IP |
 | `THROTTLE_STATS_PER_MINUTE` | `120` | Statistics requests per user |
 | `LOG_CHANNEL` | `json` | JSON lines on stderr, each with `request_id` |
