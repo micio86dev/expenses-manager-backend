@@ -102,6 +102,7 @@ arch('models are only referenced by layers that pass them around, never by contr
         'App\Http\Requests',
         'App\Http\Resources',
         'App\Http\Middleware',
+        'App\Observers',
         'App\Providers',
         'App\Repositories',
         'Database',

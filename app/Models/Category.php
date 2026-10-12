@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CategoryIcon;
+use App\Observers\StatsInvalidationObserver;
 use App\Support\Owner\IncludesUnownedRows;
 use App\Support\Owner\OwnedByCurrentOwner;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  */
 #[Fillable(['name', 'color', 'icon'])]
+#[ObservedBy(StatsInvalidationObserver::class)]
 final class Category extends Model implements IncludesUnownedRows
 {
     /** @use HasFactory<CategoryFactory> */
