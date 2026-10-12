@@ -92,3 +92,20 @@ jobs:
           coverage: none
           tools: composer:v2
       - run: composer audit
+
+  gga:
+    name: Guardian Angel review
+    # Dormant with the workflow (workflow_dispatch only). Needs the `claude` CLI and its
+    # credentials on the runner (see the root README); reviews the files changed in the last commit.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Install Guardian Angel
+        run: |
+          git clone --depth 1 https://github.com/Gentleman-Programming/gentleman-guardian-angel.git "$RUNNER_TEMP/gga"
+          (cd "$RUNNER_TEMP/gga" && ./install.sh)
+          echo "/.local/bin" >> ""
+      - run: gga run --ci
