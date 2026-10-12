@@ -27,3 +27,9 @@ it('derives the previous period with the same currency', function (): void {
         ->and($previous->range->to->toDateString())->toBe('2026-10-07')
         ->and($previous->currency)->toBe('USD');
 });
+
+it('derives a previous period even when it is longer than the span limit allows a request to be', function (): void {
+    $query = new StatsQuery(DateRange::fromStrings('2020-02-01', '2025-01-31'));
+
+    expect($query->previous()->range->to->toDateString())->toBe('2020-01-31');
+});
