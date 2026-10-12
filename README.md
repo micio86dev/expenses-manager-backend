@@ -78,7 +78,7 @@ Copy `.env.example`; notable settings:
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `DB_CONNECTION` | `sqlite` | Database engine |
-| `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = never) |
+| `SANCTUM_EXPIRATION` | `43200` | Token lifetime in minutes (empty = 30 days); expired tokens are pruned daily by the scheduler |
 | `THROTTLE_LOGIN_PER_MINUTE` | `5` | Login attempts per email and IP |
 | `THROTTLE_LOGIN_IP_PER_MINUTE` | `30` | Login attempts per IP across all emails |
 | `THROTTLE_REGISTER_PER_MINUTE` | `10` | Registrations per IP |

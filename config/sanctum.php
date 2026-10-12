@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'expiration' => env('SANCTUM_EXPIRATION') === null || env('SANCTUM_EXPIRATION') === '' ? null : (int) env('SANCTUM_EXPIRATION'),
+    'expiration' => env('SANCTUM_EXPIRATION') === null || env('SANCTUM_EXPIRATION') === '' ? 43200 : (int) env('SANCTUM_EXPIRATION'),
 
     /*
     |--------------------------------------------------------------------------
