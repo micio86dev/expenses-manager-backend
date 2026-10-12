@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\ExpenseFilter;
+use App\Support\DateRange;
 use App\Support\Owner\OwnedByCurrentOwner;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +45,42 @@ final class Expense extends Model
             // Stored as a plain Y-m-d string so range comparisons stay textual on every database.
             'spent_on' => 'date:Y-m-d',
         ];
+    }
+
+    /**
+     * Applies every criterion of the filter; the one place that defines "which expenses".
+     *
+     * @param  Builder<Expense>  $query
+     */
+    public function scopeMatching(Builder $query, ExpenseFilter $filter): void
+    {
+        $query->spentWithin($filter->range);
+
+        if ($filter->categoryId !== null) {
+            $query->where('category_id', $filter->categoryId);
+        }
+
+        if ($filter->search !== null) {
+            $query->whereLike('description', '%'.$filter->search.'%', caseSensitive: false);
+        }
+    }
+
+    /**
+     * Inclusive on both ends. `spent_on` is a plain Y-m-d string, so the comparison is textual.
+     *
+     * @param  Builder<Expense>  $query
+     */
+    public function scopeSpentWithin(Builder $query, DateRange $range): void
+    {
+        $query->whereBetween('spent_on', [$range->from->format(DateRange::FORMAT), $range->to->format(DateRange::FORMAT)]);
+    }
+
+    /**
+     * @param  Builder<Expense>  $query
+     */
+    public function scopeLatestFirst(Builder $query): void
+    {
+        $query->orderByDesc('spent_on')->orderByDesc('created_at')->orderByDesc('id');
     }
 
     /**

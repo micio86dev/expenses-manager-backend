@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repositories\Contracts;
 
 use App\Data\ExpenseData;
+use App\Data\ExpenseFilter;
+use App\Data\ExpensePage;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Expense;
 
@@ -13,6 +15,11 @@ use App\Models\Expense;
  */
 interface ExpenseRepository
 {
+    /**
+     * Expenses matching the filter, newest first (expense date, then creation time).
+     */
+    public function page(ExpenseFilter $filter): ExpensePage;
+
     /**
      * @throws ResourceNotFoundException
      */

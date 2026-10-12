@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Fakes;
 
 use App\Data\ExpenseData;
+use App\Data\ExpenseFilter;
+use App\Data\ExpensePage;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Expense;
 use App\Repositories\Contracts\ExpenseRepository;
@@ -14,6 +16,15 @@ final class InMemoryExpenseRepository implements ExpenseRepository
 {
     /** @var array<string, Expense> */
     public array $expenses = [];
+
+    public ?ExpenseFilter $lastFilter = null;
+
+    public function page(ExpenseFilter $filter): ExpensePage
+    {
+        $this->lastFilter = $filter;
+
+        return new ExpensePage([], $filter->page, $filter->perPage, 0, 1);
+    }
 
     public function get(string $id): Expense
     {
