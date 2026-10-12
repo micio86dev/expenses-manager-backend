@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Repositories\Contracts\AccessTokenRepository;
+use App\Repositories\Contracts\CategoryRepository;
 use App\Repositories\Contracts\UserRepository;
+use App\Repositories\Eloquent\EloquentCategoryRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
 use App\Repositories\Eloquent\SanctumAccessTokenRepository;
 use Illuminate\Support\ServiceProvider;
@@ -18,5 +20,6 @@ final class RepositoryServiceProvider extends ServiceProvider
     public array $bindings = [
         UserRepository::class => EloquentUserRepository::class,
         AccessTokenRepository::class => SanctumAccessTokenRepository::class,
+        CategoryRepository::class => EloquentCategoryRepository::class,
     ];
 }
