@@ -36,4 +36,12 @@ interface StatsRepository
      * The largest single expense of the range (latest, then highest id, on ties), or null.
      */
     public function biggestExpense(StatsQuery $query): ?Expense;
+
+    /**
+     * The largest expenses of the range: amount, then date, then id, all descending.
+     *
+     * @param  positive-int  $limit
+     * @return list<Expense>
+     */
+    public function topExpenses(StatsQuery $query, int $limit): array;
 }

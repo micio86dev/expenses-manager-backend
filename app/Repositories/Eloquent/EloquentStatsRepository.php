@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 final class EloquentStatsRepository implements StatsRepository
 {
+    private const array EXPENSE_COLUMNS = ['id', 'description', 'amount_cents', 'currency', 'category_id', 'spent_on', 'created_at', 'updated_at'];
+
     private const string AGGREGATES = 'SUM(amount_cents) AS total_cents, COUNT(*) AS expense_count';
 
     public function totals(StatsQuery $query): Totals
@@ -96,7 +98,19 @@ final class EloquentStatsRepository implements StatsRepository
             ->orderByDesc('amount_cents')
             ->orderByDesc('spent_on')
             ->orderByDesc('id')
-            ->first(['id', 'description', 'amount_cents', 'currency', 'category_id', 'spent_on', 'created_at', 'updated_at']);
+            ->first(self::EXPENSE_COLUMNS);
+    }
+
+    public function topExpenses(StatsQuery $query, int $limit): array
+    {
+        $expenses = $this->expenses($query)
+            ->orderByDesc('amount_cents')
+            ->orderByDesc('spent_on')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get(self::EXPENSE_COLUMNS);
+
+        return array_values($expenses->all());
     }
 
     /**

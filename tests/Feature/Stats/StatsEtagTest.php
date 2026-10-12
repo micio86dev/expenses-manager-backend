@@ -12,7 +12,7 @@ beforeEach(function (): void {
     Sanctum::actingAs($this->data->alice);
 });
 
-$endpoints = ['summary', 'by-category', 'timeseries'];
+$endpoints = ['summary', 'by-category', 'timeseries', 'top-expenses'];
 
 it('sends a strong sha256 ETag computed from the body', function (string $endpoint): void {
     $response = $this->getJson("/api/v1/stats/{$endpoint}?from=2026-10-01&to=2026-10-31")

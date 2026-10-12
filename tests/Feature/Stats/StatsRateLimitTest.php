@@ -58,3 +58,11 @@ it('does not spend the general API budget, nor is it spent by it', function (): 
 it('defaults to 120 requests per minute', function (): void {
     expect(config('throttle.stats'))->toBe(120);
 });
+
+it('counts the top expenses endpoint against the statistics limit', function (): void {
+    config(['throttle.stats' => 1]);
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->getJson('/api/v1/stats/top-expenses?from=2026-10-01&to=2026-10-31')->assertOk();
+    $this->getJson('/api/v1/stats/top-expenses?from=2026-10-01&to=2026-10-31')->assertStatus(429);
+});
