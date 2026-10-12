@@ -7,6 +7,7 @@ help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  %-12s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 setup: ## Install dependencies, create .env, generate the app key and migrate
+	git config core.hooksPath .githooks
 	composer install
 	@test -f .env || sed -e 's/^APP_ENV=.*/APP_ENV=local/' -e 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env.example > .env
 	php artisan key:generate --ansi
