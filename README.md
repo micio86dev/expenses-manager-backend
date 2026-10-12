@@ -4,9 +4,13 @@ Laravel 13 REST API for a personal expense tracker. It is the `backend/` reposit
 Expenses Manager superproject and implements the contract in `contracts/openapi.yaml`
 (OpenAPI 3.1, served under `/api/v1`).
 
-Status: foundation (phase 2). Available today: Sanctum token authentication, owner scoping,
-i18n (`it`, `en`), RFC 9457 error responses, health probes, JSON logs with request ids.
-Categories, expenses and stats follow in later phases.
+Status: phase 3. Available today: Sanctum token authentication, owner scoping, i18n (`it`, `en`),
+RFC 9457 error responses, health probes, JSON logs with request ids, categories (shared read-only
+system categories plus per-owner custom ones, archive instead of delete) and expenses (CRUD and a
+filtered, paginated listing). Stats follow in a later phase.
+
+System categories are shared rows with a NULL `owner_id`; models marked `IncludesUnownedRows` see
+`owner_id = current OR owner_id IS NULL`, implemented once in `OwnerScope`.
 
 ## Requirements
 

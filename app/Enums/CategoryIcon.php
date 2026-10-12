@@ -21,12 +21,4 @@ enum CategoryIcon: string
     case Briefcase = 'briefcase';
     case Tag = 'tag';
     case Other = 'other';
-
-    /**
-     * @return list<string>
-     */
-    public static function values(): array
-    {
-        return array_map(static fn (self $icon): string => $icon->value, self::cases());
-    }
 }
