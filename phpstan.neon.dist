@@ -9,5 +9,6 @@ parameters:
         - config
         - database
         - routes
+        - tests/Fixtures
     # The Pest test suite is analysed by running it, not by PHPStan: Pest closures
     # bind `$this` dynamically, which static analysis cannot follow.
