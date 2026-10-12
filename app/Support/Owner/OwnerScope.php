@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
 /**
- * Restricts every query on an owned model to the current owner's rows.
- * Fails closed: with no current owner the query matches nothing.
- */
-/**
+ * Restricts every query on an owned model to the current owner's rows, plus the shared
+ * rows (NULL owner) of models that implement {@see IncludesUnownedRows}.
+ * Fails closed: with no current owner the query matches nothing, shared rows included.
+ *
  * @implements Scope<Model>
  */
 final class OwnerScope implements Scope
@@ -29,6 +29,12 @@ final class OwnerScope implements Scope
 
         if ($ownerId === null) {
             $builder->whereIn($column, []);
+
+            return;
+        }
+
+        if ($model instanceof IncludesUnownedRows) {
+            $builder->where(static fn (Builder $query): Builder => $query->where($column, $ownerId)->orWhereNull($column));
 
             return;
         }

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\SystemCategory;
+use App\Models\Category;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
@@ -82,4 +84,15 @@ it('lets the demo user sign in', function (): void {
 
     $this->postJson('/api/v1/auth/login', ['email' => DemoSeeder::EMAIL, 'password' => DemoSeeder::PASSWORD])
         ->assertOk();
+});
+
+it('seeds the system categories once, shared and read-only', function (): void {
+    runSeeder(ReferenceSeeder::class);
+    runSeeder(ReferenceSeeder::class);
+
+    $system = Category::query()->withoutGlobalScopes()->get();
+
+    expect($system)->toHaveCount(count(SystemCategory::cases()))
+        ->and($system->every(fn (Category $category): bool => $category->is_system && $category->owner_id === null))->toBeTrue()
+        ->and($system->pluck('translation_key')->all())->toEqualCanonicalizing(array_map(fn (SystemCategory $c): string => $c->value, SystemCategory::cases()));
 });
