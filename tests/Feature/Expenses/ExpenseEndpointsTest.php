@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\User;
 use Database\Seeders\Reference\ReferenceSeeder;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -225,5 +226,42 @@ describe('delete', function (): void {
         $this->deleteJson("/api/v1/expenses/{$bobs->id}")->assertNotFound()->assertValidResponse(404);
 
         expect(Expense::query()->withoutGlobalScopes()->find($bobs->id))->not->toBeNull();
+    });
+});
+
+describe('calendar date storage', function (): void {
+    it('stores spent_on as a plain calendar date', function (): void {
+        $id = $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12']))
+            ->assertCreated()
+            ->json('data.id');
+
+        $raw = DB::table('expenses')->where('id', $id)->value('spent_on');
+
+        expect($raw)->toBe('2026-10-12');
+
+        $this->putJson("/api/v1/expenses/{$id}", expensePayload(['spent_on' => '2026-10-13']))->assertOk();
+
+        expect(DB::table('expenses')->where('id', $id)->value('spent_on'))->toBe('2026-10-13');
+    });
+
+    it('lists an expense on the last day of a range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12']))->assertCreated();
+
+        $this->getJson('/api/v1/expenses?from=2026-10-12&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    });
+
+    it('counts an expense created through the api on the last day of a stats range', function (): void {
+        $this->postJson('/api/v1/expenses', expensePayload(['spent_on' => '2026-10-12', 'amount_cents' => 700]))->assertCreated();
+
+        $this->getJson('/api/v1/stats/summary?from=2026-10-12&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonPath('data.total_cents', 700)
+            ->assertJsonPath('data.count', 1);
+
+        $this->getJson('/api/v1/stats/summary?from=2026-10-01&to=2026-10-12')
+            ->assertOk()
+            ->assertJsonPath('data.total_cents', 700);
     });
 });
