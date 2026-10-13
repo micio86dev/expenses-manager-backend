@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.2] - 2026-10-13
+
+- docs(backend): name DemoSeeder as the source of the demo credentials
+
 ## [0.2.1] - 2026-10-13
 
 - ci(backend): audit the lock file so the job runs without vendor
