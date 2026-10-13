@@ -108,11 +108,13 @@ it('names a shared system category in the request locale', function (): void {
 
     $this->getJson(SUMMARY_URL, ['Accept-Language' => 'it'])
         ->assertOk()
-        ->assertJsonPath('data.top_category.name', 'Trasporti');
+        ->assertValidResponse(200)
+        ->assertJsonPath('data.top_category.name', __('categories.system.transport', [], 'it'));
 
     $this->getJson(SUMMARY_URL, ['Accept-Language' => 'en'])
         ->assertOk()
-        ->assertJsonPath('data.top_category.name', 'Transport');
+        ->assertValidResponse(200)
+        ->assertJsonPath('data.top_category.name', __('categories.system.transport', [], 'en'));
 });
 
 it('rejects a missing or invalid query', function (string $query, string $field): void {
@@ -139,13 +141,14 @@ it('accepts exactly five years', function (): void {
         ->assertValidResponse(200);
 });
 
-it('explains the span limit in the request locale', function (string $locale, string $message): void {
+it('explains the span limit in the request locale', function (string $locale): void {
     $this->getJson('/api/v1/stats/summary?from=2000-01-01&to=2026-10-31', ['Accept-Language' => $locale])
         ->assertUnprocessable()
-        ->assertJsonPath('errors.to.0', $message);
+        ->assertValidResponse(422)
+        ->assertJsonPath('errors.to.0', __('stats.errors.range_too_long', ['years' => 5], $locale));
 })->with([
-    'english' => ['en', 'The date range cannot be longer than 5 years.'],
-    'italian' => ['it', 'L\'intervallo di date non può superare 5 anni.'],
+    'english' => ['en'],
+    'italian' => ['it'],
 ]);
 
 it('summarises the longest valid range without failing on its previous period', function (): void {
