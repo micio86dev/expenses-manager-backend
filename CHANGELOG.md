@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0] - 2026-10-13
+
+- ci(backend): run on push and pull request, skip the review without an API key
+- docs(ci): describe the manual CI triggers without the remote caveat
+- chore: ignore the generated skill registry
+- test: isolate the test cache and assert translated messages by locale
+- fix(ci): write the gga PATH entry to GITHUB_PATH
+- ci(backend): pin the dormant gga job to a reviewed commit
+- docs(backend): turn the README into the component guide
+- docs(backend): add checkable review rules and document the review tooling
+- ci(backend): add dormant Guardian Angel review job
+- chore(tooling): add review and memory-sync make targets
+- chore(tooling): add Guardian Angel config and run it last in pre-commit
+- chore(tooling): pin the shared Engram project name
+
 ## [0.1.0] - 2026-10-12
 
 - fix(database): wait on sqlite locks and use wal
