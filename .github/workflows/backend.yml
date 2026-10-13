@@ -90,7 +90,7 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           coverage: none
           tools: composer:v2
-      - run: composer audit
+      - run: composer audit --locked
 
   gga:
     name: Guardian Angel review
