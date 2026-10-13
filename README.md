@@ -132,7 +132,8 @@ Supported languages are listed in `config/locales.php`; add a folder under `lang
 ## Seeding
 
 `php artisan db:seed` always runs the reference seeders (idempotent, safe in production) and runs the
-demo seeder only when `APP_ENV=local` (user `demo@example.com`).
+demo seeder only when `APP_ENV=local`. The demo account (`demo@example.com` / `demo-password`) is
+defined in `DemoSeeder` (`EMAIL` and `PASSWORD`): that class is the source of truth.
 
 ## Docker
 
