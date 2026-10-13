@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.3] - 2026-10-13
+
+- No changes recorded.
+
 ## [0.2.2] - 2026-10-13
 
 - docs(backend): name DemoSeeder as the source of the demo credentials
