@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.1] - 2026-10-13
+
+- ci(backend): audit the lock file so the job runs without vendor
+
 ## [0.2.0] - 2026-10-13
 
 - ci(backend): run on push and pull request, skip the review without an API key
