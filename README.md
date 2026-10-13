@@ -149,8 +149,8 @@ docker build -f docker/Dockerfile --target prod -t expenses-backend:prod .
 
 `.github/workflows/backend.yml` runs Pint, PHPStan, Pest with coverage (minimum 90%, PHP 8.5 with PCOV)
 and `composer audit`, through the same `make` targets used locally. It is dormant: it only runs by
-hand (`workflow_dispatch`) until a remote exists, then enable the commented `push`/`pull_request`
-triggers. It also holds a `gga` job (`gga run --ci`) that needs the `claude` CLI and its credentials on the runner. `.github/dependabot.yml` proposes weekly Composer and GitHub Actions updates.
+hand (`workflow_dispatch`). The `push` and `pull_request` triggers are commented out on purpose:
+uncomment them to run it on every push. It also holds a `gga` job (`gga run --ci`) that needs the `claude` CLI and its credentials on the runner. `.github/dependabot.yml` proposes weekly Composer and GitHub Actions updates.
 
 ## Git hooks
 

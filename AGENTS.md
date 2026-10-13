@@ -23,7 +23,7 @@ Commit messages follow Conventional Commits, without AI attribution lines.
 | `make review` | Guardian Angel review of the files changed in the branch (`gga run --pr-mode`) |
 | `make memory-sync` | `engram sync`, run from the superproject root |
 
-CI (`.github/workflows/backend.yml`, manual trigger until a remote exists) runs the same targets
+CI (`.github/workflows/backend.yml`, manual trigger only; push triggers are commented out) runs the same targets
 (`make lint`, `make typecheck`, `make coverage`) plus `composer audit`.
 
 Enable the repository hooks once with `git config core.hooksPath .githooks`
