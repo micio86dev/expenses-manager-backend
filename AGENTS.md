@@ -20,12 +20,16 @@ Commit messages follow Conventional Commits, without AI attribution lines.
 | `make lint` | Pint, check only |
 | `make typecheck` | Larastan at level `max` |
 | `make format` | Pint, writes fixes |
+| `make review` | Guardian Angel review of the files changed in the branch (`gga run --pr-mode`) |
+| `make memory-sync` | `engram sync`, run from the superproject root |
 
-CI (`.github/workflows/backend.yml`, manual trigger until a remote exists) runs the same targets
+CI (`.github/workflows/backend.yml`, on push and pull request to `main` and `develop`) runs the same targets
 (`make lint`, `make typecheck`, `make coverage`) plus `composer audit`.
 
 Enable the repository hooks once with `git config core.hooksPath .githooks`
-(`commit-msg` checks Conventional Commits; `pre-commit` runs lint and typecheck when PHP files are staged).
+(`commit-msg` checks Conventional Commits; `pre-commit` runs lint and typecheck when PHP files are staged,
+then `gga run` as the last step, skipped with a message when `gga` is not installed). Never run `gga install`:
+it writes to `.git/hooks`, which `core.hooksPath` ignores.
 
 ## Architecture map
 
@@ -74,6 +78,23 @@ Probes `GET /health` and `GET /ready` live outside `/api/v1` (`routes/health.php
   or tag, write through models so `StatsInvalidationObserver` bumps the version (query-builder bulk writes must bump it explicitly).
 - Rate limits are named limiters (`login` has two buckets: email+IP and IP alone; `register`, `api`, `stats`) tuned in `config/throttle.php`.
   Login keys use `EmailKey::normalise()`, the same normalisation as `LoginRequest`.
+
+## Review rules
+
+Guardian Angel (`gga`, configured in `.gga`) reviews staged PHP files against this section; each rule is checkable in a diff.
+
+1. Every PHP file starts with `declare(strict_types=1)`; classes are `final`; DTOs are `final readonly`.
+2. Controllers are single-action and thin: they only call a FormRequest, one Action and a Resource. No queries, no business rules.
+3. Business logic lives in Actions (or Services under `app/Support`); Actions depend on repository contracts, never on Eloquent or HTTP.
+4. Queries are built only in `app/Repositories/Eloquent`, models and `Support/Owner`.
+5. No raw SQL, no dialect functions, no JSON-column queries. The only exception is `SUM(amount_cents)` and `COUNT(*)` in `EloquentStatsRepository`.
+6. Responses go through API Resources; reuse existing ones and include relations with `whenLoaded`, never by an unconditional access that triggers a query.
+7. Owner isolation comes from `OwnedByCurrentOwner` / `OwnerScope`. No hand-written `owner_id` filters and no `withoutGlobalScopes()` outside `Support/Owner`.
+8. Everything written to disk is English; only `lang/it/` holds Italian.
+9. Every user-facing string is a translation key present in both `lang/it` and `lang/en`.
+10. Money is integer minor units plus an ISO currency; IDs are UUIDs; migrations hold schema only.
+11. No dead code, commented-out code, unused imports or duplicated logic.
+12. Every behaviour change ships with a Pest test (feature, unit or arch) and updated docs and contract copy.
 
 ## Known limits (follow-ups)
 
